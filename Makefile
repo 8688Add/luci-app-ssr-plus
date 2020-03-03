@@ -66,16 +66,27 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/conffiles
-
+/etc/china_ssr.txt
 /etc/config/shadowsocksr
-
+/etc/config/white.list
+/etc/config/black.list
+/etc/dnsmasq.ssr/ad.conf
+/etc/dnsmasq.ssr/gfw_list.conf
 endef
 
 define Package/$(PKG_NAME)/install
-	
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DATA) ./root/etc/china_ssr.txt $(1)/etc/china_ssr.txt
 
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/shadowsocksr $(1)/etc/config/shadowsocksr
+	$(INSTALL_DATA) ./root/etc/config/*.list $(1)/etc/config/
+
+	$(INSTALL_DIR) $(1)/etc/dnsmasq.oversea
+	$(INSTALL_DATA) ./root/etc/dnsmasq.oversea/* $(1)/etc/dnsmasq.oversea/
+
+	$(INSTALL_DIR) $(1)/etc/dnsmasq.ssr
+	$(INSTALL_DATA) ./root/etc/dnsmasq.ssr/* $(1)/etc/dnsmasq.ssr/
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
@@ -122,6 +133,11 @@ fi
 exit 0
 endef
 
-
+define Package/$(PKG_NAME)/postrm
+#!/bin/sh
+rm -rf /etc/china_ssr.txt /etc/dnsmasq.ssr /etc/dnsmasq.oversea /etc/config/shadowsocksr /etc/config/black.list \
+		/etc/config/gfw.list /etc/config/white.list >/dev/null 2>&1
+exit 0
+endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
